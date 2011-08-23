@@ -6,7 +6,9 @@ import java.awt.event.KeyEvent;
 
 public class Tank {
 	public static final int SPEED = 5; 
+	public static final int WIDTH = 30, HEIGHT = 30;
 	int x, y;
+	TankClient tc;
 	
 	boolean bL = false, bU = false, bR = false, bD = false; 
 	enum Direction {
@@ -14,17 +16,22 @@ public class Tank {
 	}
 	
 	private Direction dir = Direction.STOP; 
-	
+	private Direction fireDir = Direction.R;
 	
 	public Tank(int x, int y) {
 		this.x = x;
 		this.y = y;
 	}
 	
+	public Tank(int x, int y, TankClient tc) {
+		this(x,y);
+		this.tc = tc;
+	}
+	
 	public void draw(Graphics g) {
 		Color c = g.getColor();//save the original color of the graphics 
 		g.setColor(Color.red);
-		g.fillOval(x, y, 30, 30);
+		g.fillOval(x, y, WIDTH, HEIGHT);
 		g.setColor(c);
 		
 		move();
@@ -44,10 +51,18 @@ public class Tank {
 			break;
 		case KeyEvent.VK_RIGHT:
 			bR = true;
+			break;
+		case KeyEvent.VK_CONTROL:
+			tc.setMissile(fire());
 		}
 		locateDirection();
 	}
 	
+	private Missile fire() {
+		Missile missile = new Missile(x+WIDTH/2-Missile.WIDTH/2,y+HEIGHT/2-Missile.HEIGHT/2,dir);
+		return missile;
+	}
+
 	public void keyReleased(KeyEvent e) {
 		// TODO Auto-generated method stub
 		switch(e.getKeyCode()) {

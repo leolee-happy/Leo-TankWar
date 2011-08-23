@@ -10,9 +10,13 @@ public class TankClient extends Frame{
 	
 	public static final int WIDTH = 800, HEIGHT = 600;
 	
-	Tank myTank = new Tank(50,50);
+	Tank myTank = new Tank(50,50,this);
 	Image image = null; 
-
+	Missile missile;
+	public void setMissile(Missile missile) {
+		this.missile = missile;
+	}
+	
 	public void update(Graphics g) {
 		if (image == null) {
 			image = this.createImage(WIDTH, HEIGHT);
@@ -24,9 +28,13 @@ public class TankClient extends Frame{
 		newG.setColor(c);
 		paint(newG);
 		g.drawImage(image, 0, 0, null);
-	}	
+	}
+
 	
 	public void paint(Graphics g) {
+		if (missile != null) {
+			missile.draw(g);
+		}
 		myTank.draw(g);
 	}
 	
