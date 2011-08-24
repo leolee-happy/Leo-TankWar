@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.Iterator;
 import java.util.Random;
 
 public class Tank {
@@ -13,7 +14,8 @@ public class Tank {
 	
 	private boolean isEnemy;
 	private boolean live = true;
-	private int step = 20+random.nextInt(30);
+	private int step = 30+random.nextInt(30);
+	private int lastX, lastY;
 	
 	public void setLive(boolean live) {
 		this.live = live;
@@ -51,6 +53,8 @@ public class Tank {
 	public Tank(int x, int y) {
 		this.x = x;
 		this.y = y;
+		this.lastX = x;
+		this.lastY = y;
 	}
 	
 	public Tank(int x, int y, TankClient tc, boolean isEnemy) {
@@ -128,6 +132,9 @@ public class Tank {
 	}
 	
 	void move() {
+		lastX = x;
+		lastY = y;
+		
 		if (isEnemy){
 			if (step <= 0) {
 				Direction[] directions = Direction.values();
@@ -137,6 +144,7 @@ public class Tank {
 			step--;
 			if (random.nextInt(30)> 28) fire();
 		}
+		
 		switch(dir) {
 		case L:
 			x -= SPEED;
@@ -186,6 +194,52 @@ public class Tank {
 		return new Rectangle(x,y,WIDTH,HEIGHT);
 	}
 	
+	private boolean collidWithWall(Wall w) {
+		if (live&&getRectangle().intersects(w.getRect())) {
+			//this.dir = Direction.STOP;
+			this.x = lastX;
+			this.y = lastY;
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean collidWithWalls() {
+		if (!live) return false;
+		Iterator<Wall> it = tc.getWalls();
+		while (it.hasNext()) {
+			Wall tempWall = it.next();
+			if (this.collidWithWall(tempWall)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean collidWithTank(Tank w) {
+		if (w.getX()< x || w.getY() < y)
+		if (live&&getRectangle().intersects(w.getRectangle())) {
+			this.dir = Direction.STOP;
+			w.dir = Direction.STOP;
+			this.lastPosition();
+			w.lastPosition();
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean collidWithTanks() {
+		if (!live) return false;
+		Iterator<Tank> it = tc.getTanks();
+		while (it.hasNext()) {
+			Tank tempTank = it.next();
+			if (this.collidWithTank(tempTank)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void locateDirection() {
 		if(bL && !bU && !bR && !bD) dir = Direction.L;
 		else if(bL && bU && !bR && !bD) dir = Direction.LU;
@@ -196,5 +250,10 @@ public class Tank {
 		else if(!bL && !bU && !bR && bD) dir = Direction.D;
 		else if(bL && !bU && !bR && bD) dir = Direction.LD;
 		else if(!bL && !bU && !bR && !bD) dir = Direction.STOP;
+	}
+	
+	public void lastPosition(){
+		this.x = lastX;
+		this.y = lastY;
 	}
 }

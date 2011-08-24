@@ -21,12 +21,21 @@ public class TankClient extends Frame{
 	List<Explosion> explosions = new ArrayList<Explosion>();
 	Tank myTank = new Tank(0,0,this,false);
 	List<Tank> tanks = new ArrayList<Tank>();
+	List<Wall> walls = new ArrayList<Wall>();
 	
 	public TankClient() {
 		super();
 		tanks.add(myTank);
 		for(int i = 0; i < 10; i++) {
-			tanks.add(new Tank(0+i*60,500, this, true, Direction.U));
+			tanks.add(new Tank(700,80+i*50, this, true, Direction.L));
+		}
+		
+		for(int i = 0; i < 5; i++) {
+			tanks.add(new Tank(0,300+i*50, this, true, Direction.U));
+		}
+		
+		for(int i = 0; i < 4; i++) {
+			walls.add(new Wall(190,100+i*120,390, 30, this));
 		}
 	}
 	
@@ -58,6 +67,10 @@ public class TankClient extends Frame{
 	public Iterator<Tank> getTanks() {
 		return tanks.listIterator();
 	}
+	
+	public Iterator<Wall> getWalls() {
+		return walls.listIterator();
+	}
 
 	
 	public void paint(Graphics g) {
@@ -65,6 +78,7 @@ public class TankClient extends Frame{
 		for(int i = 0; i < missiles.size(); i++) {
 			Missile m = missiles.get(i);
 			m.hitTanks();
+			m.collidWithWalls();
 			if (m.dead()) {
 				missiles.remove(m);
 				i--;
@@ -83,12 +97,19 @@ public class TankClient extends Frame{
 		
 		for(int i = 0; i < tanks.size(); i++) {
 			Tank m = tanks.get(i);
+			m.collidWithWalls();
+			m.collidWithTanks();
 			if (!m.isLive()) {
 				tanks.remove(m);
 				i--;
 			}
 			else m.draw(g);
-		}		
+		}
+		
+		for(int i = 0; i < walls.size(); i++) {
+			Wall m = walls.get(i);
+			m.draw(g);
+		}
 		
 	}
 	

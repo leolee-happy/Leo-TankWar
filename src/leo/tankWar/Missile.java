@@ -75,6 +75,26 @@ public class Missile {
 		return false;
 	}
 	
+	private boolean collidWithWall(Wall w) {
+		if (live && getRectangle().intersects(w.getRect())) {
+			live = false;
+			return true;
+		}
+		return false;
+	}
+	
+	public boolean collidWithWalls() {
+		if (!live) return false;
+		Iterator<Wall> it = tc.getWalls();
+		while (it.hasNext()) {
+			Wall tempWall = it.next();
+			if (this.collidWithWall(tempWall)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	
 	void move() {
 		switch(dir) {
