@@ -5,26 +5,39 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
+import java.util.ArrayList;
 
 public class TankClient extends Frame{
 	
-	public static final int WIDTH = 800, HEIGHT = 600;
+	public static final int GAMEWIDTH = 800, GAMEHEIGHT = 600;
 	
-	Tank myTank = new Tank(50,50,this);
+	Tank myTank = new Tank(50,50,this,false);
+	Tank anotherTank = new Tank(100,100,this,true);
 	Image image = null; 
-	Missile missile;
-	public void setMissile(Missile missile) {
-		this.missile = missile;
+	
+	List<Missile> missiles = new ArrayList<Missile>();
+	List<Explosion> explosions = new ArrayList<Explosion>();
+	
+	public void addMissile(Missile missile) {
+		this.missiles.add(missile);
+	}
+	
+	public void addExplosion(Explosion e) {
+		this.explosions.add(e);
 	}
 	
 	public void update(Graphics g) {
 		if (image == null) {
-			image = this.createImage(WIDTH, HEIGHT);
+			image = this.createImage(GAMEWIDTH, GAMEHEIGHT);
 		}
 		Graphics newG = image.getGraphics();
 		Color c = newG.getColor();
 		newG.setColor(Color.GREEN);
-		newG.fillRect(0, 0, WIDTH, HEIGHT);
+		newG.fillRect(0, 0, GAMEWIDTH, GAMEHEIGHT);
+		newG.setColor(Color.BLACK);
+		newG.drawString("Remaining Missiles: "+missiles.size(), 10, 35);
+		newG.drawString("Remaining Explosions: "+explosions.size(), 10, 55);
 		newG.setColor(c);
 		paint(newG);
 		g.drawImage(image, 0, 0, null);
@@ -32,11 +45,33 @@ public class TankClient extends Frame{
 
 	
 	public void paint(Graphics g) {
-		if (missile != null) {
-			missile.draw(g);
+
+		for(int i = 0; i < missiles.size(); i++) {
+			Missile m = missiles.get(i);
+			m.hitTank(anotherTank);
+			if (m.dead()) {
+				missiles.remove(m);
+				i--;
+			}
+			else m.draw(g);
 		}
+		
+		for(int i = 0; i < explosions.size(); i++) {
+			Explosion m = explosions.get(i);
+			if (m.isDead()) {
+				explosions.remove(m);
+				i--;
+			}
+			else m.draw(g);
+		}
+		
 		myTank.draw(g);
+		if (anotherTank.isLive()) {
+			anotherTank.draw(g);
+		}
+		
 	}
+	
 	
 	private class PaintThread implements Runnable {
 
@@ -67,7 +102,7 @@ public class TankClient extends Frame{
 
 	public void launchFrame() {
 		this.setLocation(400,300);
-		this.setSize(800,600);
+		this.setSize(GAMEWIDTH,GAMEHEIGHT);
 		this.addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {

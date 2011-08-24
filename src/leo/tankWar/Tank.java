@@ -2,15 +2,38 @@ package leo.tankWar;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 
 public class Tank {
-	public static final int SPEED = 5; 
+	public static final int SPEED = 3; 
 	public static final int WIDTH = 30, HEIGHT = 30;
-	int x, y;
+	
+	private boolean isEnemy;
+	private boolean live = true;
+	
+	public void setLive(boolean live) {
+		this.live = live;
+	}
+
+	public boolean isLive() {
+		return live;
+	}
+
+	private int x, y;
+	
+	public int getX() {
+		return x;
+	}
+
+	public int getY() {
+		return y;
+	}
+
 	TankClient tc;
 	
-	boolean bL = false, bU = false, bR = false, bD = false; 
+	boolean bL = false, bU = false, bR = false, bD = false;
+	
 	enum Direction {
 		L, R, U, D, LU, LD, RU, RD, STOP;
 	}
@@ -23,14 +46,16 @@ public class Tank {
 		this.y = y;
 	}
 	
-	public Tank(int x, int y, TankClient tc) {
+	public Tank(int x, int y, TankClient tc, boolean isEnemy) {
 		this(x,y);
 		this.tc = tc;
+		this.isEnemy = isEnemy;
 	}
 	
 	public void draw(Graphics g) {
 		Color c = g.getColor();//save the original color of the graphics 
-		g.setColor(Color.red);
+		if (isEnemy)g.setColor(Color.blue);
+		else g.setColor(Color.red);
 		g.fillOval(x, y, WIDTH, HEIGHT);
 		g.setColor(c);
 		
@@ -52,14 +77,14 @@ public class Tank {
 		case KeyEvent.VK_RIGHT:
 			bR = true;
 			break;
-		case KeyEvent.VK_CONTROL:
-			tc.setMissile(fire());
 		}
 		locateDirection();
+		
+
 	}
 	
 	private Missile fire() {
-		Missile missile = new Missile(x+WIDTH/2-Missile.WIDTH/2,y+HEIGHT/2-Missile.HEIGHT/2,dir);
+		Missile missile = new Missile(x+WIDTH/2-Missile.WIDTH/2,y+HEIGHT/2-Missile.HEIGHT/2,fireDir,tc);
 		return missile;
 	}
 
@@ -77,6 +102,10 @@ public class Tank {
 			break;
 		case KeyEvent.VK_RIGHT:
 			bR = false;
+			break;
+		case KeyEvent.VK_S:
+			tc.addMissile(fire());
+			break;
 		}
 		locateDirection();
 	}
@@ -114,6 +143,17 @@ public class Tank {
 		case STOP:
 			break;
 		}
+		if (dir != Direction.STOP) {
+			fireDir = dir;
+		}
+		if (x < 0) x = 0;
+		if (y < 23) y = 23;
+		if (x > TankClient.GAMEWIDTH - WIDTH) x = TankClient.GAMEWIDTH-WIDTH;
+		if (y > TankClient.GAMEHEIGHT - HEIGHT) y = TankClient.GAMEHEIGHT-HEIGHT;
+	}
+	
+	Rectangle getRectangle() {
+		return new Rectangle(x,y,WIDTH,HEIGHT);
 	}
 	
 	private void locateDirection() {
