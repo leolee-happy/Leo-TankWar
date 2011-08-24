@@ -42,11 +42,7 @@ public class Tank {
 	TankClient tc;
 	
 	boolean bL = false, bU = false, bR = false, bD = false;
-	
-	enum Direction {
-		L, R, U, D, LU, LD, RU, RD, STOP;
-	}
-	
+		
 	private Direction dir = Direction.STOP; 
 	private Direction fireDir = Direction.R;
 	

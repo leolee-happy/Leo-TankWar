@@ -6,7 +6,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
 
-import leo.tankWar.Tank.Direction;
+import leo.tankWar.Direction;
 
 public class Missile {
 	public static final int SPEED = 6;

@@ -9,7 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 
-import leo.tankWar.Tank.Direction;
+import leo.tankWar.Direction;
 
 public class TankClient extends Frame{
 	
