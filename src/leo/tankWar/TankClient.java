@@ -5,19 +5,30 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
+
+import leo.tankWar.Tank.Direction;
 
 public class TankClient extends Frame{
 	
 	public static final int GAMEWIDTH = 800, GAMEHEIGHT = 600;
 	
-	Tank myTank = new Tank(50,50,this,false);
-	Tank anotherTank = new Tank(100,100,this,true);
 	Image image = null; 
 	
 	List<Missile> missiles = new ArrayList<Missile>();
 	List<Explosion> explosions = new ArrayList<Explosion>();
+	Tank myTank = new Tank(0,0,this,false);
+	List<Tank> tanks = new ArrayList<Tank>();
+	
+	public TankClient() {
+		super();
+		tanks.add(myTank);
+		for(int i = 0; i < 10; i++) {
+			tanks.add(new Tank(0+i*60,500, this, true, Direction.U));
+		}
+	}
 	
 	public void addMissile(Missile missile) {
 		this.missiles.add(missile);
@@ -26,6 +37,7 @@ public class TankClient extends Frame{
 	public void addExplosion(Explosion e) {
 		this.explosions.add(e);
 	}
+	
 	
 	public void update(Graphics g) {
 		if (image == null) {
@@ -42,13 +54,17 @@ public class TankClient extends Frame{
 		paint(newG);
 		g.drawImage(image, 0, 0, null);
 	}
+	
+	public Iterator<Tank> getTanks() {
+		return tanks.listIterator();
+	}
 
 	
 	public void paint(Graphics g) {
 
 		for(int i = 0; i < missiles.size(); i++) {
 			Missile m = missiles.get(i);
-			m.hitTank(anotherTank);
+			m.hitTanks();
 			if (m.dead()) {
 				missiles.remove(m);
 				i--;
@@ -65,10 +81,14 @@ public class TankClient extends Frame{
 			else m.draw(g);
 		}
 		
-		myTank.draw(g);
-		if (anotherTank.isLive()) {
-			anotherTank.draw(g);
-		}
+		for(int i = 0; i < tanks.size(); i++) {
+			Tank m = tanks.get(i);
+			if (!m.isLive()) {
+				tanks.remove(m);
+				i--;
+			}
+			else m.draw(g);
+		}		
 		
 	}
 	

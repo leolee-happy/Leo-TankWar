@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.Iterator;
 
 import leo.tankWar.Tank.Direction;
 
@@ -14,19 +15,22 @@ public class Missile {
 	TankClient tc;
 	
 	boolean live = true;
+	boolean isEnemy;
 	
 	private Direction dir = Direction.STOP; 
 	
-	public Missile(int x, int y, Direction dir, TankClient tc) {
+	public Missile(int x, int y, Direction dir, TankClient tc, boolean isEnemy) {
 		this.x = x;
 		this.y = y;
 		this.dir = dir;
 		this.tc = tc;
+		this.isEnemy = isEnemy;
 	}
 	
 	public void draw(Graphics g) {
 		Color c = g.getColor();//save the original color of the graphics.lalalla 
-		g.setColor(Color.black);
+		if (!isEnemy)g.setColor(Color.black);
+		else g.setColor(Color.MAGENTA);
 		g.fillOval(x, y, WIDTH,HEIGHT);
 		g.setColor(c);
 		
@@ -44,11 +48,29 @@ public class Missile {
 	}
 	
 	boolean hitTank(Tank t) {
-		if (t.isLive()&&getRectangle().intersects(t.getRectangle())) {
+		if (live&&t.isLive()&&getRectangle().intersects(t.getRectangle())) {
 			t.setLive(false);
 			live = false;
 			tc.addExplosion(new Explosion(x,y,tc));
 			return true;
+		}
+		return false;
+	}
+	
+	public boolean isEnemy() {
+		return isEnemy;
+	}
+
+	boolean hitTanks() {
+		if (!live) return false;
+		Iterator<Tank> it = tc.getTanks();
+		while (it.hasNext()) {
+			Tank tempTank = it.next();
+			if (tempTank.isEnemy() != isEnemy) {
+				if (this.hitTank(tempTank)) {
+					return true;
+				}
+			}
 		}
 		return false;
 	}
