@@ -2,16 +2,51 @@ package leo.tankWar;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.Toolkit.*;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Random;
 
 public class Tank {
 	public static final int SPEED = 3; 
-	public static final int WIDTH = 30, HEIGHT = 30;
+	public static final int WIDTH = 50, HEIGHT = 50;
 	public static final int SCORE = 5;
+	
 	public static Random random = new Random();
+	
+	public static Toolkit toolkit = Toolkit.getDefaultToolkit();
+	
+	public static Image[] tankImages;
+	public static Map<String,Image> imgs = new HashMap<String,Image>();
+	public int lifeLimit;
+	
+	static {
+		tankImages = new Image[] {
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankD.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankL.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankU.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankR.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankLD.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankLU.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankRU.gif")),
+				toolkit.getImage(Tank.class.getClassLoader().getResource("images/TankRD.gif"))
+		};
+		
+		imgs.put("D", tankImages[0]);
+		imgs.put("L", tankImages[1]);
+		imgs.put("U", tankImages[2]);
+		imgs.put("R", tankImages[3]);
+		imgs.put("LD", tankImages[4]);
+		imgs.put("LU", tankImages[5]);
+		imgs.put("RU", tankImages[6]);
+		imgs.put("RD", tankImages[7]);
+		
+	}
 	
 	boolean isEnemy;
 	boolean live = true;
@@ -20,8 +55,11 @@ public class Tank {
 	int life;
 	BloodBar bar;
 	
+	
 	public int getScore() {
+		if (isEnemy)
 		return SCORE;
+		else return -200;
 	}
 	
 	public int getLife() {
@@ -58,7 +96,9 @@ public class Tank {
 	
 	boolean bL = false, bU = false, bR = false, bD = false;
 		
-	Direction dir = Direction.STOP; 
+	Direction dir = Direction.STOP;
+	String directionString = "D";
+	
 	Direction fireDir = Direction.R;
 	
 	public Tank(int x, int y) {
@@ -72,8 +112,9 @@ public class Tank {
 		this(x,y);
 		this.tc = tc;
 		this.isEnemy = isEnemy;
-		if (isEnemy) life = 20;
-		else life = 100;
+		if (isEnemy) lifeLimit = 20;
+		else lifeLimit = 100;
+		life = lifeLimit;
 		bar = new BloodBar(x, y, WIDTH, HEIGHT, tc);
 	}
 	
@@ -82,17 +123,16 @@ public class Tank {
 		this.tc = tc;
 		this.isEnemy = isEnemy;
 		this.dir = dir;
-		if (isEnemy) life = 20;
-		else life = 100;
+		if (isEnemy) lifeLimit = 20;
+		else lifeLimit = 100;
+		life = lifeLimit;
 		bar = new BloodBar(x, y, WIDTH, HEIGHT, tc);
 	}
 	
 	
 	public void draw(Graphics g) {
 		Color c = g.getColor();//save the original color of the graphics 
-		if (isEnemy)g.setColor(Color.blue);
-		else g.setColor(Color.red);
-		g.fillOval(x, y, WIDTH, HEIGHT);
+		g.drawImage(imgs.get(directionString), x, y,null);
 		g.setColor(c);
 		if (!isEnemy) {
 			bar.updatePos(x, y);
@@ -118,15 +158,32 @@ public class Tank {
 			break;
 		}
 		locateDirection();
+		if (dir != Direction.STOP) {
+			directionString = dir.toString();
+		}
 		
 
 	}
 	
 	public void fire() {
 		if (!live) return;
-		Missile missile = new Missile(x+WIDTH/2-Missile.WIDTH/2,y+HEIGHT/2-Missile.HEIGHT/2,fireDir,tc,isEnemy);
+		int width = imgs.get(directionString).getWidth(null);
+		int height = imgs.get(directionString).getHeight(null);
+		Missile missile = new Missile(x+width/2-Missile.WIDTH/2,y+height/2-Missile.HEIGHT/2,fireDir,tc,isEnemy);
 		tc.addMissile(missile);
 		//return missile;
+	}
+	
+	public void superFire() {
+		if (!live) return;
+		int width = imgs.get(directionString).getWidth(null);
+		int height = imgs.get(directionString).getHeight(null);
+		for (int i = 0; i < 8; i++) {
+			Direction tDir = Direction.values()[i];
+			Missile missile = new Missile(x+width/2-Missile.WIDTH/2,y+height/2-Missile.HEIGHT/2,tDir,tc,isEnemy);
+			tc.addMissile(missile);
+		}
+
 	}
 
 	public void keyReleased(KeyEvent e) {
@@ -147,6 +204,9 @@ public class Tank {
 		case KeyEvent.VK_S:
 			fire();
 			break;
+		case KeyEvent.VK_A:
+			superFire();
+			break;
 		}
 		locateDirection();
 	}
@@ -159,6 +219,9 @@ public class Tank {
 			if (step <= 0) {
 				Direction[] directions = Direction.values();
 				dir = directions[random.nextInt(directions.length-1)];
+				if (dir != Direction.STOP) {
+					directionString = dir.toString();
+				}
 				step = 20+random.nextInt(30);
 			}
 			step--;
@@ -204,18 +267,20 @@ public class Tank {
 	}
 	
 	public void boundCheck() {
+		int width = imgs.get(directionString).getWidth(null);
+		int height = imgs.get(directionString).getHeight(null);
 		if (x < 0) 
 			x = 0;
 		if (y < 23) 
 			y = 23;
-		if (x > TankClient.GAMEWIDTH - WIDTH) 
-			x = TankClient.GAMEWIDTH-WIDTH;
-		if (y > TankClient.GAMEHEIGHT - HEIGHT) 
-			y = TankClient.GAMEHEIGHT-HEIGHT;
+		if (x > TankClient.GAMEWIDTH - width) 
+			x = TankClient.GAMEWIDTH-width;
+		if (y > TankClient.GAMEHEIGHT - height) 
+			y = TankClient.GAMEHEIGHT - height;
 	}
 	
 	Rectangle getRectangle() {
-		return new Rectangle(x,y,WIDTH,HEIGHT);
+		return new Rectangle(x+7,y+7,WIDTH,HEIGHT);
 	}
 	
 	boolean collidWithWall(Wall w) {
@@ -308,7 +373,7 @@ public class Tank {
 			Color c = g.getColor();
 			g.setColor(co);
 			g.drawRect(x, y-10, width, 10);
-			g.fillRect(x, y-10, width*life/100, 10);
+			g.fillRect(x, y-10, width*life/lifeLimit, 10);
 			g.setColor(c);
 		}
 		

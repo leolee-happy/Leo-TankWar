@@ -13,7 +13,8 @@ public class SuperTank extends Tank{
 	
 	public SuperTank(int x, int y, TankClient tc, boolean isEnemy, Direction dir) {
 		super(x, y, tc, isEnemy, dir);
-		this.life = 100;
+		this.lifeLimit = 200;
+		this.life = lifeLimit;
 		bar = new BloodBar(x, y, WIDTH, HEIGHT, tc);
 		// TODO Auto-generated constructor stub
 	}
@@ -24,10 +25,12 @@ public class SuperTank extends Tank{
 	
 	public void draw(Graphics g) {
 		Color c = g.getColor();//save the original color of the graphics 
-		g.setColor(Color.pink);
+		g.setColor(Color.green);
 		g.fillOval(x, y, WIDTH, HEIGHT);
+		g.setColor(Color.BLACK);
+		g.fillOval(x+10, y+10, WIDTH-20, HEIGHT-20);
 		g.setColor(c);
-		bar.setColor(Color.pink);
+		bar.setColor(Color.blue);
 		bar.updatePos(x, y);
 		bar.draw(g);
 		move();

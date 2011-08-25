@@ -58,12 +58,22 @@ public class TankClient extends Frame{
 		}
 		Graphics newG = image.getGraphics();
 		Color c = newG.getColor();
-		newG.setColor(Color.GREEN);
-		newG.fillRect(0, 0, GAMEWIDTH, GAMEHEIGHT);
+		Font f =newG.getFont();
 		newG.setColor(Color.BLACK);
+		newG.fillRect(0, 0, GAMEWIDTH, GAMEHEIGHT);
+		newG.setColor(Color.white);
 		newG.drawString("Remaining Missiles: "+missiles.size(), 10, 35);
 		newG.drawString("Remaining Explosions: "+explosions.size(), 10, 55);
 		newG.drawString("Score: "+score, 10, 75);
+		int fontSize = (int)Math.round(12.0 * 800 / 72.0);
+
+	    Font font = new Font("Arial", Font.PLAIN, fontSize);
+	    g.setFont(font);
+		if (score == 105)
+			newG.drawString("YOU WIN", 360, 300);
+		if (score <= 0)
+			newG.drawString("YOU LOSE", 360, 300);
+		newG.setFont(f);
 		newG.setColor(c);
 		paint(newG);
 		g.drawImage(image, 0, 0, null);
@@ -166,7 +176,7 @@ public class TankClient extends Frame{
 		});
 		this.setTitle("Leo-Tank War");
 		this.setResizable(false);
-		this.setBackground(Color.green);
+		this.setBackground(Color.BLACK);
 		this.addKeyListener(new KeyListener());
 		setVisible(true);
 		new Thread(new PaintThread()).start();

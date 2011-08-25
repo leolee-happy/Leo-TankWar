@@ -29,7 +29,7 @@ public class Missile {
 	
 	public void draw(Graphics g) {
 		Color c = g.getColor();//save the original color of the graphics.lalalla 
-		if (!isEnemy)g.setColor(Color.black);
+		if (!isEnemy)g.setColor(Color.WHITE);
 		else g.setColor(Color.MAGENTA);
 		g.fillOval(x, y, WIDTH,HEIGHT);
 		g.setColor(c);

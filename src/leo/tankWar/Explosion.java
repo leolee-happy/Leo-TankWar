@@ -2,12 +2,36 @@ package leo.tankWar;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 public class Explosion {
 	int x, y;
 	boolean live = true;
 	
-	int[] diameters = {4, 10, 20, 30, 50, 20, 10, 2};
+	public static Toolkit toolkit = Toolkit.getDefaultToolkit();
+	static BufferedImage img;
+	
+
+	public static BufferedImage[] eImages = new BufferedImage[11];
+	
+	static {
+		try {
+		    for (int i = 0; i < 11; i++)
+			eImages[i] = ImageIO.read(Explosion.class.getClassLoader().getResource("images/"+i+".gif"));
+		} catch (IOException e) {
+		}
+
+		
+	}
+	
 	int step = 0;
 	
 	TankClient tc;
@@ -19,14 +43,14 @@ public class Explosion {
 	}
 	
 	public void draw(Graphics p) {
-		if (step == diameters.length) {
+		if (step == eImages.length) {
 			live = false;
 			return;
 		}
 		
 		Color c = p.getColor();
 		p.setColor(Color.YELLOW);
-		p.fillOval(x, y, diameters[step], diameters[step]);
+		p.drawImage(eImages[step], x, y, null);
 		p.setColor(c);
 		step++;
 	}
