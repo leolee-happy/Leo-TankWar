@@ -53,6 +53,7 @@ public class Missile {
 			
 			if (t.getLife() <= 0) {
 				t.setLive(false);
+				System.out.print(t.getScore());
 				tc.addScore(t.getScore());
 			}
 			

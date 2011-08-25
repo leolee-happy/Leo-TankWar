@@ -18,8 +18,8 @@ public class SuperTank extends Tank{
 		// TODO Auto-generated constructor stub
 	}
 	
-	public int getScorer() {
-		return Tank.SCORE;
+	public int getScore() {
+		return SCORE;
 	}
 	
 	public void draw(Graphics g) {
