@@ -10,13 +10,28 @@ import java.util.Random;
 public class Tank {
 	public static final int SPEED = 3; 
 	public static final int WIDTH = 30, HEIGHT = 30;
+	public static final int SCORE = 5;
 	public static Random random = new Random();
 	
-	private boolean isEnemy;
-	private boolean live = true;
-	private int step = 30+random.nextInt(30);
-	private int lastX, lastY;
+	boolean isEnemy;
+	boolean live = true;
+	int step = 30+random.nextInt(30);
+	int lastX, lastY;
+	int life;
+	BloodBar bar;
 	
+	public int getScore() {
+		return SCORE;
+	}
+	
+	public int getLife() {
+		return life;
+	}
+
+	public void gotFired() {
+		this.life -= 20 ;
+	}
+
 	public void setLive(boolean live) {
 		this.live = live;
 	}
@@ -29,7 +44,7 @@ public class Tank {
 		return isEnemy;
 	}
 
-	private int x, y;
+	int x, y;
 	
 	public int getX() {
 		return x;
@@ -43,8 +58,8 @@ public class Tank {
 	
 	boolean bL = false, bU = false, bR = false, bD = false;
 		
-	private Direction dir = Direction.STOP; 
-	private Direction fireDir = Direction.R;
+	Direction dir = Direction.STOP; 
+	Direction fireDir = Direction.R;
 	
 	public Tank(int x, int y) {
 		this.x = x;
@@ -57,6 +72,9 @@ public class Tank {
 		this(x,y);
 		this.tc = tc;
 		this.isEnemy = isEnemy;
+		if (isEnemy) life = 20;
+		else life = 100;
+		bar = new BloodBar(x, y, WIDTH, HEIGHT, tc);
 	}
 	
 	public Tank(int x, int y, TankClient tc, boolean isEnemy, Direction dir) {
@@ -64,6 +82,9 @@ public class Tank {
 		this.tc = tc;
 		this.isEnemy = isEnemy;
 		this.dir = dir;
+		if (isEnemy) life = 20;
+		else life = 100;
+		bar = new BloodBar(x, y, WIDTH, HEIGHT, tc);
 	}
 	
 	
@@ -73,7 +94,10 @@ public class Tank {
 		else g.setColor(Color.red);
 		g.fillOval(x, y, WIDTH, HEIGHT);
 		g.setColor(c);
-		
+		if (!isEnemy) {
+			bar.updatePos(x, y);
+			bar.draw(g);
+		}
 		move();
 	}
 	
@@ -98,11 +122,11 @@ public class Tank {
 
 	}
 	
-	private Missile fire() {
-		if (!live) return null;
+	public void fire() {
+		if (!live) return;
 		Missile missile = new Missile(x+WIDTH/2-Missile.WIDTH/2,y+HEIGHT/2-Missile.HEIGHT/2,fireDir,tc,isEnemy);
 		tc.addMissile(missile);
-		return missile;
+		//return missile;
 	}
 
 	public void keyReleased(KeyEvent e) {
@@ -176,6 +200,10 @@ public class Tank {
 		if (dir != Direction.STOP) {
 			fireDir = dir;
 		}
+		boundCheck();
+	}
+	
+	public void boundCheck() {
 		if (x < 0) 
 			x = 0;
 		if (y < 23) 
@@ -190,7 +218,7 @@ public class Tank {
 		return new Rectangle(x,y,WIDTH,HEIGHT);
 	}
 	
-	private boolean collidWithWall(Wall w) {
+	boolean collidWithWall(Wall w) {
 		if (live&&getRectangle().intersects(w.getRect())) {
 			//this.dir = Direction.STOP;
 			this.x = lastX;
@@ -212,7 +240,7 @@ public class Tank {
 		return false;
 	}
 	
-	private boolean collidWithTank(Tank w) {
+	boolean collidWithTank(Tank w) {
 		if (w.getX()< x || w.getY() < y)
 		if (live&&getRectangle().intersects(w.getRectangle())) {
 			this.dir = Direction.STOP;
@@ -236,7 +264,7 @@ public class Tank {
 		return false;
 	}
 	
-	private void locateDirection() {
+	void locateDirection() {
 		if(bL && !bU && !bR && !bD) dir = Direction.L;
 		else if(bL && bU && !bR && !bD) dir = Direction.LU;
 		else if(!bL && bU && !bR && !bD) dir = Direction.U;
@@ -251,5 +279,38 @@ public class Tank {
 	public void lastPosition(){
 		this.x = lastX;
 		this.y = lastY;
+	}
+	
+	class BloodBar {
+		int x, y, width, height;
+		TankClient tc;
+		Color co = Color.red;
+		
+		public BloodBar(int x, int y, int width, int height, TankClient tc) {
+			this.x = x;
+			this.y = y;
+			this.width = width;
+			this.height = height;
+			this.tc = tc;
+		}
+		
+		public void setColor(Color c) {
+			this.co = c;
+		}
+		
+		
+		public void updatePos(int x, int y) {
+			this.x = x;
+			this.y = y;
+		}
+		
+		public void draw (Graphics g) {
+			Color c = g.getColor();
+			g.setColor(co);
+			g.drawRect(x, y-10, width, 10);
+			g.fillRect(x, y-10, width*life/100, 10);
+			g.setColor(c);
+		}
+		
 	}
 }

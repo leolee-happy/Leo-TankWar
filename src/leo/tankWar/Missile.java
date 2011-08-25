@@ -49,7 +49,13 @@ public class Missile {
 	
 	boolean hitTank(Tank t) {
 		if (live&&t.isLive()&&getRectangle().intersects(t.getRectangle())) {
-			t.setLive(false);
+			t.gotFired();
+			
+			if (t.getLife() <= 0) {
+				t.setLive(false);
+				tc.addScore(t.getScore());
+			}
+			
 			live = false;
 			tc.addExplosion(new Explosion(x,y,tc));
 			return true;

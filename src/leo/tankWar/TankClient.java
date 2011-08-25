@@ -14,12 +14,12 @@ import leo.tankWar.Direction;
 public class TankClient extends Frame{
 	
 	public static final int GAMEWIDTH = 800, GAMEHEIGHT = 600;
-	
-	Image image = null; 
+	Image image = null;
+	int score = 0;
 	
 	List<Missile> missiles = new ArrayList<Missile>();
 	List<Explosion> explosions = new ArrayList<Explosion>();
-	Tank myTank = new Tank(0,0,this,false);
+	Tank myTank = new Tank(0,30,this,false);
 	List<Tank> tanks = new ArrayList<Tank>();
 	List<Wall> walls = new ArrayList<Wall>();
 	
@@ -37,6 +37,10 @@ public class TankClient extends Frame{
 		for(int i = 0; i < 4; i++) {
 			walls.add(new Wall(190,100+i*120,390, 30, this));
 		}
+	}
+	
+	public void addScore(int a) {
+		score += a;
 	}
 	
 	public void addMissile(Missile missile) {
@@ -59,6 +63,7 @@ public class TankClient extends Frame{
 		newG.setColor(Color.BLACK);
 		newG.drawString("Remaining Missiles: "+missiles.size(), 10, 35);
 		newG.drawString("Remaining Explosions: "+explosions.size(), 10, 55);
+		newG.drawString("Score: "+score, 10, 75);
 		newG.setColor(c);
 		paint(newG);
 		g.drawImage(image, 0, 0, null);
@@ -70,6 +75,11 @@ public class TankClient extends Frame{
 	
 	public Iterator<Wall> getWalls() {
 		return walls.listIterator();
+	}
+	
+	public void addBosses() {
+		for (int i =0; i< 3; i++)
+			tanks.add(new SuperTank(730,130+i*150,this,true,Direction.L));
 	}
 
 	
@@ -93,6 +103,10 @@ public class TankClient extends Frame{
 				i--;
 			}
 			else m.draw(g);
+		}
+		
+		if (tanks.size()==1 && score == Tank.SCORE*15 ){
+			addBosses();
 		}
 		
 		for(int i = 0; i < tanks.size(); i++) {
